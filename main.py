@@ -53,10 +53,9 @@ def check_user_word(word: str, c: str) -> int:
   used.append(word)
   return OK
 
+c = ''
 print("아무 단어나 입력하여 시작하세요.")
 while True:
-  c = ''
-
   while True:
     inp = input()
     checker = check_user_word(inp, c)
