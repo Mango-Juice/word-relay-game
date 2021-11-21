@@ -8,6 +8,10 @@ ERROR_MESSAGE = {USED: "이미 사용된 단어입니다.",
 used = []
 
 
+def clean(raw: str) -> str:
+  return raw.replace("-", "").replace("^", " ")
+
+
 def print_computer_word(c: str) -> str:
   URL = "https://opendict.korean.go.kr/api/search"
   param = {"key": os.environ['API_KEY'],
@@ -24,7 +28,7 @@ def print_computer_word(c: str) -> str:
   data = result.json()["channel"]["item"]
 
   for i in data:
-    word = i["word"]
+    word = clean(i["word"])
     mean = i['sense'][0]
 
     if not (word in used):
@@ -47,23 +51,35 @@ def check_user_word(word: str, c: str) -> int:
   result = requests.get(URL, params=param)
   data = result.json()["channel"]
 
-  if data["total"] == 0 or data["item"][0]["word"] != word:
+  if data["total"] == 0 or clean(data["item"][0]["word"]) != word:
     return NOT_WORD
 
   used.append(word)
   return OK
 
 c = ''
-print("아무 단어나 입력하여 시작하세요.")
+print("아무 단어나 입력하여 시작하세요. ('포기'로 포기 가능)")
 while True:
+  pogi = False
+
   while True:
     inp = input()
+
+    if inp == '포기':
+      pogi = True
+      break
+
     checker = check_user_word(inp, c)
     if checker == OK: 
       c = inp[-1]
       break
     else: print(ERROR_MESSAGE[checker])
   
+  if pogi:
+    print("당신이 졌어요. 아래의 단어도 가능했는데...")
+    print_computer_word(c)
+    break
+
   computer = print_computer_word(c)
   if computer: c = computer
   else:
